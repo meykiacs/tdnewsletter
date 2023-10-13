@@ -14,7 +14,7 @@ class Newsletter extends Table {
       id mediumint(9) NOT NULL AUTO_INCREMENT,
       email varchar(255) NOT NULL,
       subscription_status varchar(50) NOT NULL,
-      hashed_confirmation_code varchar(255) DEFAULT NULL,
+      confirmation_code varchar(255) DEFAULT NULL,
       created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
       updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL,
       PRIMARY KEY  (id)

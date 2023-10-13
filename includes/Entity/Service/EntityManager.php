@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Class EntityManager
  *
@@ -12,8 +14,7 @@ namespace TdNewsletter\Entity\Service;
 
 use TdNewsletter\Entity\Model\Entity;
 
-class EntityManager
-{
+class EntityManager {
 
   /**
    * @var \WPDB The WordPress database object.
@@ -30,8 +31,7 @@ class EntityManager
    *
    * @param array $entityClasses An array mapping table names to entity classes.
    */
-  public function __construct()
-  {
+  public function __construct() {
     global $wpdb;
     $this->wpdb = $wpdb;
   }
@@ -44,8 +44,7 @@ class EntityManager
    * @param int $id The entity ID.
    * @return ?Entity The retrieved entity or null.
    */
-  public function getById(string $entityClassName, $id): ?Entity
-  {
+  public function getById(string $entityClassName, $id): ?Entity {
     $tableName = $this->getTable($entityClassName);
 
     $query = $this->wpdb->prepare("SELECT * FROM {$tableName} WHERE id = %d", $id);
@@ -54,25 +53,30 @@ class EntityManager
       return null;
     $entity = new $entityClassName();
     foreach ($result as $column => $value) {
-      if (in_array($column, $entity->getSerializedProps())) {
-        $value = unserialize($value);
+      if ($column === 'id') {
+        $entity->$column = intval($value);
       }
-
-      $entity->$column = $value;
+      elseif (in_array($column, $entity->getSerializedProps())) {
+        $value = unserialize($value);
+      } else {
+        $entity->$column = $value;
+      }
     }
 
     return $entity;
   }
 
-    /**
+  /**
    * Retrieves an entity by its ID from the database.
-   *
    * @param string $entityClassName The entity object.
-   * @param int $id The entity ID.
+   * @param string $column
+   * @param mixed $columnValue
    * @return ?Entity The retrieved entity or null.
+   * @template T of Entity
+   * @psalm-param class-string<T> $entityClassName
+   * @psalm-return T|null
    */
-  public function getBy(string $entityClassName, string $column, $columnValue): ?Entity
-  {
+  public function getBy(string $entityClassName, string $column, $columnValue): ?Entity {
     $tableName = $this->getTable($entityClassName);
 
     $query = $this->wpdb->prepare("SELECT * FROM {$tableName} WHERE {$column} = %s", $columnValue);
@@ -99,22 +103,11 @@ class EntityManager
    * @return bool True if the save operation was successful, false otherwise.
    * @throws \Exception if couldn't save
    */
-  public function save(Entity $entity): int
-  {
+  public function save(Entity $entity): int {
     $tableName = $this->getTable($entity);
-    // $reflection = new \ReflectionObject($entity);
-    // $properties = $reflection->getProperties(\ReflectionProperty::IS_PROTECTED);
-
-    // $data = [];
-    // foreach ($properties as $property) {
-    //   $property->setAccessible(true);
-    //   $propertyName = $property->getName();
-    //   $propertyValue = $property->getValue($entity);
-    //   $data[$propertyName] = $propertyValue;
-    // }
 
     $data = get_object_vars($entity);
-    
+
     foreach ($entity->getSerializedProps() as $prop) {
       if (isset($data[$prop])) {
         $data[$prop] = serialize($data[$prop]);
@@ -126,11 +119,10 @@ class EntityManager
       if (!$result) {
         throw new \Exception("Error Updating the Entity");
       }
-
     } else {
       $result = $this->wpdb->insert($tableName, $data);
       if ($result) {
-        $entity->id =$this->wpdb->insert_id;
+        $entity->id = $this->wpdb->insert_id;
       } else {
         throw new \Exception("Error Inserting the Entity");
       }
@@ -145,8 +137,7 @@ class EntityManager
    * @param string $entityClassName The class name for the entity.
    * @return Entity[] An array of retrieved entities.
    */
-  public function getAll(string $entityClassName): array
-  {
+  public function getAll(string $entityClassName): array {
     $table = $this->getTable($entityClassName);
     $query = "SELECT * FROM {$table}";
     $results = $this->wpdb->get_results($query);
@@ -174,8 +165,7 @@ class EntityManager
    * @return bool True if the delete operation was successful, false otherwise.
    * @throws \Exception When attempting to delete an entity without an ID.
    */
-  public function delete(Entity $entity): bool
-  {
+  public function delete(Entity $entity): bool {
     $tableName = $this->getTable($entity);
 
     if (!$entity->id) {
@@ -193,8 +183,7 @@ class EntityManager
    * @param Entity|string $entity The entity object or its class name.
    * @return string The table name.
    */
-  private function getTable($entity): string
-  {
+  private function getTable($entity): string {
     if (is_string($entity)) {
       $className = $entity;
     } elseif ($entity instanceof Entity) {

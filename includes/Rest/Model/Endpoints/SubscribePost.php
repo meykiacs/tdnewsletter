@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TdNewsletter\Rest\Model\Endpoints;
 
 use DI\Container;
@@ -12,10 +14,21 @@ use TdNewsletter\Validate\EmailValidator;
 
 class SubscribePost extends Endpoint {
   private EntityManager $em;
-  public function __construct(EntityManager $em, Container $container) {
+  private string $confirmEndpoint;
+  private string $textDomain;
+  private string $restNamespace;
+  private EmailValidator $emailValidator;
+  private EmailSanitizer $emailSanitizer;
+
+  public function __construct(EntityManager $em, string $confirmEndpoint, string $restNamespace, EmailValidator $emailValidator, EmailSanitizer $emailSanitizer, $textDomain) {
     parent::__construct('POST');
     $this->em = $em;
-    $this->addField(new Field('email', true, 'string', $container->get(EmailValidator::class), $container->get(EmailSanitizer::class)));
+    $this->confirmEndpoint = $confirmEndpoint;
+    $this->restNamespace = $restNamespace;
+    $this->textDomain = $textDomain;
+    $this->emailValidator = $emailValidator;
+    $this->emailSanitizer = $emailSanitizer;
+    $this->addField(new Field('email', true, 'string', $this->emailValidator, $this->emailSanitizer));
   }
 
   public function getPermissionCallback(): callable {
@@ -27,16 +40,22 @@ class SubscribePost extends Endpoint {
      */
     return function (\WP_REST_Request $request) {
       $email = $request->get_param('email');
-      $row = $this->em->getBy(Newsletter::class, 'email', $email);
-      if ($row) {
+      $newsletter = $this->em->getBy(Newsletter::class, 'email', $email);
+      if ($newsletter && $newsletter->subscription_status === 'active') {
         return new \WP_REST_Response(array('message' => 'Email already exists'), 409);
       } else {
         $newsletter = new Newsletter();
         $newsletter->email = $email;
         $newsletter->subscription_status = 'inactive';
-        $newsletter->setCodes();
+        $code = $newsletter->setCode();
         $id = $this->em->save($newsletter);
-        return new \WP_REST_Response(['id' => $id], 200);
+        $confirmation_url = get_rest_url(null, $this->restNamespace . '/' . $this->confirmEndpoint);
+        $confirmation_url .= "?id=" . urlencode_deep($id) . "&code=" . urlencode_deep($code);
+        $to = $email;
+        $subject = esc_html__("Confirm your email", $this->textDomain);
+        $message = esc_html__("Please click the following link to confirm your email address: $confirmation_url", $this->textDomain);
+        wp_mail($to, $subject, $message);
+        return new \WP_REST_Response(['id' => $id,], 200);
       }
     };
   }

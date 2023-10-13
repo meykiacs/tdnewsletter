@@ -1,0 +1,20 @@
+{
+    "name": "kia/tdnewsletter",
+    "authors": [
+        {
+            "name": "Meysam Kia",
+            "email": "msmkia@outlook.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "TdNewsletter\\": "includes/"
+        }
+    },
+    "require": {
+        "php-di/php-di": "^7.0"
+    },
+    "require-dev": {
+        "php-stubs/wordpress-stubs": "^6.3"
+    }
+}

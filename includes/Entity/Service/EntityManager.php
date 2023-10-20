@@ -55,8 +55,7 @@ class EntityManager {
     foreach ($result as $column => $value) {
       if ($column === 'id') {
         $entity->$column = intval($value);
-      }
-      elseif (in_array($column, $entity->getSerializedProps())) {
+      } elseif (in_array($column, $entity->getSerializedProps())) {
         $value = unserialize($value);
       } else {
         $entity->$column = $value;
@@ -93,6 +92,32 @@ class EntityManager {
     }
 
     return $entity;
+  }
+
+  public function getAllBy(string $entityClassName, string $column, $columnValue): array {
+    $tableName = $this->getTable($entityClassName);
+
+    $query = $this->wpdb->prepare("SELECT * FROM {$tableName} WHERE {$column} = %s", $columnValue);
+    $results = $this->wpdb->get_results($query);
+    if ($results === null)
+      return [];
+
+    $entities = [];
+    foreach ($results as $result) {
+      $entity = new $entityClassName();
+      foreach ($result as $column => $value) {
+        if ($column === 'id') {
+          $entity->$column = intval($value);
+        } elseif (in_array($column, $entity->getSerializedProps())) {
+          $value = unserialize($value);
+        } else {
+          $entity->$column = $value;
+        }
+      }
+      $entities[] = $entity;
+    }
+
+    return $entities;
   }
 
 
@@ -147,10 +172,13 @@ class EntityManager {
     foreach ($results as $result) {
       $entity = new $entityClassName();
       foreach ($result as $column => $value) {
-        if (in_array($column, $entity->getSerializedProps())) {
+        if ($column === 'id') {
+          $entity->$column = intval($value);
+        } elseif (in_array($column, $entity->getSerializedProps())) {
           $value = unserialize($value);
+        } else{
+          $entity->$column = $value;
         }
-        $entity->$column = $value;
       }
       $entities[] = $entity;
     }

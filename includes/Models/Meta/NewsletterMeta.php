@@ -17,7 +17,6 @@ class NewsletterMeta extends Meta {
     'properties'  => [
       'sent'  =>  [
         'type'  =>  'boolean',
-        'type'  =>  'required',
       ],
     ]
   ];

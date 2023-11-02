@@ -16,5 +16,10 @@
     },
     "require-dev": {
         "php-stubs/wordpress-stubs": "^6.3"
+    },
+    "config": {
+        "platform": {
+            "php": "7.4.21"
+        }
     }
 }

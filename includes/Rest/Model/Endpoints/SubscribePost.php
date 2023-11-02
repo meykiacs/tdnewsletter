@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace TdNewsletter\Rest\Model\Endpoints;
 
-use DI\Container;
 use TdNewsletter\Entity\Model\Newsletter;
 use TdNewsletter\Entity\Service\EntityManager;
 use TdNewsletter\Rest\Model\Endpoints\Endpoint;

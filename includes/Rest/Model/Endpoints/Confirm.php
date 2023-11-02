@@ -6,9 +6,6 @@ use DI\Container;
 use TdNewsletter\Entity\Model\Newsletter;
 use TdNewsletter\Entity\Service\EntityManager;
 use TdNewsletter\Rest\Model\Endpoints\Endpoint;
-use TdNewsletter\Rest\Model\Fields\Field;
-use TdNewsletter\Sanitize\EmailSanitizer;
-use TdNewsletter\Validate\EmailValidator;
 
 class Confirm extends Endpoint {
   private EntityManager $em;

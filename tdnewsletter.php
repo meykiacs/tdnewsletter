@@ -7,7 +7,6 @@ use Psr\Container\ContainerInterface;
 use TdNewsletter\CPTResource\Model\CPT;
 use TdNewsletter\CPTResource\Model\CPTResource;
 use TdNewsletter\CPTResource\Service\RegisterCPTResource;
-use TdNewsletter\Models\Fields\SentField;
 use TdNewsletter\Models\Meta\NewsletterMeta;
 use TdNewsletter\PluginHooks\PluginHooks;
 use TdNewsletter\Rest\Model\Endpoints\Confirm;

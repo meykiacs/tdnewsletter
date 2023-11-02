@@ -40,9 +40,9 @@ class TableManager {
         global $wpdb;
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         // dropping of the table should be in reverse order
-        for ($i = count($this->tables) - 1; $i >= 0; $i--) {
-          $wpdb->query($this->tables[$i]->getDropSql());
-        }
+        // for ($i = count($this->tables) - 1; $i >= 0; $i--) {
+        //   $wpdb->query($this->tables[$i]->getDropSql());
+        // }
       });
     }
 

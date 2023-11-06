@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 namespace TdNewsletter\Sanitize;
-
 use DI\Container;
 
 class EmailSanitizer implements SanitizerInterface {

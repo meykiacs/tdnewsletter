@@ -15,6 +15,8 @@ use TdNewsletter\Rest\Model\Route\Route;
 use TdNewsletter\Rest\Service\Rest;
 use TdNewsletter\Table\Service\TableManager;
 use TdNewsletter\Table\Model\Newsletter;
+use TdNewsletter\Validate\EmailValidator;
+use TdNewsletter\Sanitize\EmailSanitizer;
 
 /**
  * Plugin Name: tdnewsletter
@@ -34,8 +36,8 @@ $tdn_containerBuilder->addDefinitions([
   'rest.namespace' => DI\value('tdnewsletter/v1'),
   'endpoint.subscribe'  => DI\value('subscribe'),
   'endpoint.confirm'  => DI\value('confirm'),
-  EmailValidator::class => DI\create(EmailValidator::class),
-  EmailSanitizer::class => DI\create(EmailSanitizer::class),
+  EmailValidator::class => DI\autowire(),
+  EmailSanitizer::class => DI\autowire(),
   SubscribePost::class => DI\autowire()->constructorParameter('confirmEndpoint', DI\get('endpoint.confirm'))->constructorParameter('restNamespace', DI\get('rest.namespace'))->constructorParameter('textDomain', DI\get('textDomain')),
   'cpt.newsletter' => function (ContainerInterface $c) {
     $cpt = new CPT('newsletter', 'Newsletter');

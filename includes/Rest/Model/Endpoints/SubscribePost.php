@@ -11,7 +11,8 @@ use TdNewsletter\Rest\Model\Fields\Field;
 use TdNewsletter\Sanitize\EmailSanitizer;
 use TdNewsletter\Validate\EmailValidator;
 
-class SubscribePost extends Endpoint {
+class SubscribePost extends Endpoint
+{
   private EntityManager $em;
   private string $confirmEndpoint;
   private string $textDomain;
@@ -19,7 +20,8 @@ class SubscribePost extends Endpoint {
   private EmailValidator $emailValidator;
   private EmailSanitizer $emailSanitizer;
 
-  public function __construct(EntityManager $em, string $confirmEndpoint, string $restNamespace, EmailValidator $emailValidator, EmailSanitizer $emailSanitizer, $textDomain) {
+  public function __construct(EntityManager $em, string $confirmEndpoint, string $restNamespace, EmailValidator $emailValidator, EmailSanitizer $emailSanitizer, $textDomain)
+  {
     parent::__construct('POST');
     $this->em = $em;
     $this->confirmEndpoint = $confirmEndpoint;
@@ -30,10 +32,12 @@ class SubscribePost extends Endpoint {
     $this->addField(new Field('email', true, 'string', $this->emailValidator, $this->emailSanitizer));
   }
 
-  public function getPermissionCallback(): callable {
+  public function getPermissionCallback(): callable
+  {
     return '__return_true';
   }
-  public function getCallback(): callable {
+  public function getCallback(): callable
+  {
     /**
      * @return \WP_REST_Response|\WP_Error
      */
@@ -50,10 +54,11 @@ class SubscribePost extends Endpoint {
         $id = $this->em->save($newsletter);
         $confirmation_url = get_rest_url(null, $this->restNamespace . '/' . $this->confirmEndpoint);
         $confirmation_url .= "?id=" . urlencode_deep($id) . "&code=" . urlencode_deep($code);
+        $message = esc_html__("Please click the following link to confirm your email address: ", $this->textDomain) . $confirmation_url;
         $to = $email;
         $subject = esc_html__("Confirm your email", $this->textDomain);
-        $message = esc_html__("Please click the following link to confirm your email address: $confirmation_url", $this->textDomain);
-        wp_mail($to, $subject, $message);
+        $headers = 'From: Me <me@' . $_SERVER['SERVER_NAME'] . '>' . "\r\n";
+        wp_mail($to, $subject, $message, $headers);
         return new \WP_REST_Response(['id' => $id,], 200);
       }
     };

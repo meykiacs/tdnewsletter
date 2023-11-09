@@ -33,7 +33,6 @@ class SentField extends Field {
           $email[] = $entity->email;
         }
         foreach ($emails as $email) {
-          // Replace this with your actual sending function
           $sent = wp_mail($email->email, 'Newsletter', 'Your newsletter content');
         }
       }

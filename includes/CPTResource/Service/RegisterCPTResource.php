@@ -61,7 +61,7 @@ class RegisterCPTResource {
             'type' => $meta->type,
             'description' => $meta->description,
             'single' => $meta->single,
-            'show_in_rest' => ['schema' => $meta->schema],
+            'show_in_rest' => $meta->schema ? ['schema' => $meta->schema] : false,
             'sanitize_callback' => $meta->sanitizeCallback(),
             'auth_callback' => $meta->authCallback(),
             // 'schema'  => $meta->schema

@@ -7,7 +7,7 @@ namespace TdNewsletter\CPTResource\Model;
 abstract class Meta {
   public string $slug;
   public string $type;
-  public array $schema;
+  public $schema;
   public string $description = '';
   public bool $single = true;
   public bool $showInRest = true;

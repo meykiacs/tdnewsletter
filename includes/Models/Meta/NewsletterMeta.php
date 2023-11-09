@@ -5,19 +5,21 @@ declare(strict_types=1);
 namespace TdNewsletter\Models\Meta;
 
 use TdNewsletter\CPTResource\Model\Meta;
+use TdNewsletter\Entity\Model\Newsletter;
+use TdNewsletter\Entity\Service\EntityManager;
 
-class NewsletterMeta extends Meta {
+class NewsletterMeta extends Meta
+{
 
   public string $slug = 'newsletter';
-  public string $type = 'object';
+  public string $type = 'boolean';
+  private EntityManager $em;
 
+  public function __construct(EntityManager $em)
+  {
+    $this->em = $em;
+  }
 
-  public array $schema = [
-    'type'  => 'object',
-    'properties'  => [
-      'sent'  =>  [
-        'type'  =>  'boolean',
-      ],
-    ]
-  ];
+  public $schema = false;
+
 }

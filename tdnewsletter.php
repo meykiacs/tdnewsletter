@@ -17,6 +17,8 @@ use TdNewsletter\Table\Service\TableManager;
 use TdNewsletter\Table\Model\Newsletter;
 use TdNewsletter\Validate\EmailValidator;
 use TdNewsletter\Sanitize\EmailSanitizer;
+use TdNewsletter\Entity\Service\EntityManager;
+use TdNewsletter\Rest\Model\Endpoints\SendNewsletter;
 
 /**
  * Plugin Name: tdnewsletter
@@ -36,12 +38,13 @@ $tdn_containerBuilder->addDefinitions([
   'rest.namespace' => DI\value('tdnewsletter/v1'),
   'endpoint.subscribe'  => DI\value('subscribe'),
   'endpoint.confirm'  => DI\value('confirm'),
+  'endpoint.send.newsletter'  => DI\value('send_newsletter'),
   EmailValidator::class => DI\autowire(),
   EmailSanitizer::class => DI\autowire(),
   SubscribePost::class => DI\autowire()->constructorParameter('confirmEndpoint', DI\get('endpoint.confirm'))->constructorParameter('restNamespace', DI\get('rest.namespace'))->constructorParameter('textDomain', DI\get('textDomain')),
   'cpt.newsletter' => function (ContainerInterface $c) {
     $cpt = new CPT('newsletter', 'Newsletter');
-    $cpt->metas[] = new NewsletterMeta();
+    $cpt->metas[] = new NewsletterMeta($c->get(EntityManager::class));
     $cptResource = new CPTResource($cpt);
     // $cptResource->fields[] = $c->get(SentField::class);
     return $cptResource;
@@ -62,7 +65,11 @@ $tdn_subscribeRoute->addEndpoint($tdn_subscribePost);
 $tdn_confirm = $tdn_container->make(Confirm::class);
 $tdn_confirmRoute = new Route($tdn_container->get('rest.namespace'), $tdn_container->get('endpoint.confirm'));
 $tdn_confirmRoute->addEndpoint($tdn_confirm);
-$tdn_container->get(Rest::class)->addRoute($tdn_subscribeRoute)->addRoute($tdn_confirmRoute)->register();
+$tdn_sendNewsletter = $tdn_container->make(SendNewsletter::class);
+$tdn_sendNewsletterRoute = new Route($tdn_container->get('rest.namespace'), $tdn_container->get('endpoint.send.newsletter'));
+$tdn_sendNewsletterRoute->addEndpoint($tdn_sendNewsletter);
+$tdn_container->get(Rest::class)->addRoute($tdn_subscribeRoute)->addRoute($tdn_confirmRoute)->addRoute($tdn_sendNewsletterRoute)->register();
+
 
 // register newsletter posttype
 $tdn_container->get(RegisterCPTResource::class)->add($tdn_container->get('cpt.newsletter'))->register();
@@ -120,7 +127,7 @@ function tdn_render() {
   <pre style="display: none !important" id="newsletter">
   <?php echo wp_json_encode($data, JSON_HEX_TAG); ?>
   </pre>
-  <div style="display: none !important" id="newsletter-data" data-fetched="1" data-rest-url="<?php echo esc_attr(get_rest_url(null, 'wp/v2/tdn_newsletter')); ?>">
+  <div style="display: none !important" id="newsletter-data" data-fetched="1" data-rest-url="<?php echo esc_attr(get_rest_url(null, 'wp/v2/tdn_newsletter')); ?>" data-send-newsletter-rest-url="<?php  echo esc_attr(get_rest_url(null, 'tdnewsletter/v1/send_newsletter')); ?>">
   </div>
 <?php
 }

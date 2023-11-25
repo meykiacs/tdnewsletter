@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+// declare(strict_types=1);
 /**
  * Class EntityManager
  *
@@ -75,9 +75,9 @@ class EntityManager {
    * @psalm-param class-string<T> $entityClassName
    * @psalm-return T|null
    */
-  public function getBy(string $entityClassName, string $column, $columnValue): ?Entity {
+  public function getBy(string $entityClassName, string $column, $columnValue) {
     $tableName = $this->getTable($entityClassName);
-
+    
     $query = $this->wpdb->prepare("SELECT * FROM {$tableName} WHERE {$column} = %s", $columnValue);
     $result = $this->wpdb->get_row($query);
     if ($result === null)

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+// declare(strict_types=1);
 
 namespace TdNewsletter\Rest\Model\Endpoints;
 
@@ -45,7 +45,10 @@ class SubscribePost extends Endpoint
       $email = $request->get_param('email');
       $newsletter = $this->em->getBy(Newsletter::class, 'email', $email);
       if ($newsletter && $newsletter->subscription_status === 'active') {
-        return new \WP_REST_Response(array('message' => 'Email already exists'), 409);
+        return new \WP_REST_Response(array('message' => 'exists'), 409);
+      } elseif ($newsletter && $newsletter->subscription_status === 'inactive') {
+        return new \WP_REST_Response(array('message' => 'notConfirmed'), 409);
+
       } else {
         $newsletter = new Newsletter();
         $newsletter->email = $email;
